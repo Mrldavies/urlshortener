@@ -45,9 +45,11 @@ if(isset($_POST['submit'])){
 		$urlError = "Please enter a url";
 	}
 
-  	$short = shortHash($con);
-
+  	
 	if($error == 0){
+		// Executes shortHash function to create the Short URL
+		$short = shortHash($con);
+		
 		// Checks if URL is already in database	
 		$stmt = $con->prepare("SELECT * FROM url WHERE url = :url");				
 		$stmt->bindparam(":url", $url);
