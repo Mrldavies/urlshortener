@@ -16,6 +16,14 @@
 
 	}
 
+    function addHTTP($url){
+        $parsed = parse_url($url);
+        if(empty($parsed['scheme'])) {
+            $url = "http://". $url;
+        }
+            return $url;
+    }
+
 function shortHash($con){
 	// Loops hash if not in database
 	$exists = true;
@@ -42,14 +50,13 @@ if(isset($_POST['submit'])){
 
 	if($url == null){
 		$error++;
-		$urlError = "Please enter a url";
-	}
-
-  	
+		$urlError = "Please enter a URL";
+    }
+    
+    // Formates URL so site can redirect.
+    $url =  addHttp($url);
+  
 	if($error == 0){
-		// Executes shortHash function to create the Short URL
-		$short = shortHash($con);
-		
 		// Checks if URL is already in database	
 		$stmt = $con->prepare("SELECT * FROM url WHERE url = :url");				
 		$stmt->bindparam(":url", $url);
@@ -59,8 +66,10 @@ if(isset($_POST['submit'])){
 		if($urlExists == 1){
 			$row = $stmt->fetch();
 			$shortURL = "<a href=\"/" . $row['short'] . "\">" . $_SERVER['HTTP_HOST'] . "/" . $row['short'] . "</a>";
-		// If URL doesn't exisit insert into database.	
 		}else{
+            // If URL doesn't exisit executes shortHash function to create the Short URL
+            $short = shortHash($con);
+            // Inserts URL and short URL into database
 			$stmt = $con->prepare("INSERT INTO url (url, short)VALUES(:url, :short)");
 			$stmt->bindparam(":url", $url);
 			$stmt->bindparam(":short", $short);
